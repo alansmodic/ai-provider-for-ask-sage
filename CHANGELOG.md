@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.1.1]
+
+### Changed
+- PHPCS ruleset now includes WordPress-Extra, PrefixAllGlobals, and the documented VIP array syntax for sniff properties.
+- PHPStan no longer points at a WordPress core SDK path that does not exist in this repository.
+- Ask Sage base URLs are HTTPS-only. A misconfigured GovCloud URL no longer falls back to the commercial endpoint.
+- OpenAI-compatible requests authenticate with a Bearer token only; native requests still use `x-access-tokens`.
+- Filter output for `/server/query` is sanitized before it is sent.
+- Model discovery failures are reported under `WP_DEBUG` instead of being swallowed.
+
 ## [1.1.0]
 
 ### Added

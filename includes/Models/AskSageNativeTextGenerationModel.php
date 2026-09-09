@@ -50,14 +50,18 @@ class AskSageNativeTextGenerationModel extends AbstractApiBasedModel implements 
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param list<Message> $prompt The conversation turns.
+	 * @param Message[] $prompt The conversation turns.
+	 * @return GenerativeAiResult The generation result.
+	 *
+	 * @throws ResponseException If the response is unsuccessful or missing required data.
 	 */
 	public function generateTextResult( array $prompt ): GenerativeAiResult {
 		$request = new Request(
 			HttpMethodEnum::POST(),
 			AskSageProvider::url( 'server/query' ),
 			array( 'Content-Type' => 'application/json' ),
-			$this->prepare_query_params( $prompt )
+			$this->prepare_query_params( $prompt ),
+			$this->getRequestOptions()
 		);
 
 		$request  = $this->getRequestAuthentication()->authenticateRequest( $request );
@@ -78,7 +82,7 @@ class AskSageNativeTextGenerationModel extends AbstractApiBasedModel implements 
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param list<Message> $prompt The conversation turns.
+	 * @param Message[] $prompt The conversation turns.
 	 * @return array<string, mixed> The request body.
 	 */
 	private function prepare_query_params( array $prompt ): array {
@@ -118,16 +122,59 @@ class AskSageNativeTextGenerationModel extends AbstractApiBasedModel implements 
 			 * Filters the Ask Sage /server/query request body.
 			 *
 			 * Useful for enforcing a mandated grounding dataset across an entire site.
+			 * Returned values are sanitized before they are sent.
 			 *
 			 * @since 1.0.0
 			 *
 			 * @param array<string, mixed> $params   The request body.
 			 * @param string               $model_id The selected model ID.
 			 */
-			$params = (array) apply_filters( 'ai_provider_for_ask_sage_query_params', $params, $this->metadata()->getId() );
+			$filtered = apply_filters( 'ai_provider_for_ask_sage_query_params', $params, $this->metadata()->getId() );
+			if ( is_array( $filtered ) ) {
+				$params = $filtered;
+			}
 		}
 
-		return $params;
+		return $this->sanitize_query_params( $params );
+	}
+
+	/**
+	 * Strips non-JSON-safe values from a /server/query body.
+	 *
+	 * Filter callbacks must not be able to inject objects or resources into the
+	 * payload that is sent to the remote API.
+	 *
+	 * @since 1.1.1
+	 *
+	 * @param array<string|int, mixed> $params The request body.
+	 * @param int                      $depth  Current recursion depth.
+	 * @return array<string|int, mixed> The sanitized request body.
+	 */
+	private function sanitize_query_params( array $params, int $depth = 0 ): array {
+		if ( $depth > 5 ) {
+			return array();
+		}
+
+		$sanitized = array();
+
+		foreach ( $params as $key => $value ) {
+			if ( is_string( $key ) && '' === $key ) {
+				continue;
+			}
+
+			if ( is_object( $value ) || is_resource( $value ) ) {
+				continue;
+			}
+
+			if ( is_array( $value ) ) {
+				$sanitized[ $key ] = $this->sanitize_query_params( $value, $depth + 1 );
+				continue;
+			}
+
+			$sanitized[ $key ] = $value;
+		}
+
+		return $sanitized;
 	}
 
 	/**
@@ -138,7 +185,7 @@ class AskSageNativeTextGenerationModel extends AbstractApiBasedModel implements 
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param list<Message> $prompt The conversation turns.
+	 * @param Message[] $prompt The conversation turns.
 	 * @return array{0: string, 1: string} The system text and user text.
 	 */
 	private function flatten_prompt( array $prompt ): array {
@@ -274,7 +321,7 @@ class AskSageNativeTextGenerationModel extends AbstractApiBasedModel implements 
 	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $source The source array.
-	 * @param list<string>         $keys   Candidate keys, in priority order.
+	 * @param string[]             $keys   Candidate keys, in priority order.
 	 * @return int The value, or 0 when none is present.
 	 */
 	private function first_int( array $source, array $keys ): int {
@@ -286,5 +333,4 @@ class AskSageNativeTextGenerationModel extends AbstractApiBasedModel implements 
 
 		return 0;
 	}
-
 }

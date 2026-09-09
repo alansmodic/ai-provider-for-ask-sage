@@ -10,6 +10,7 @@ declare( strict_types=1 );
 
 namespace WordPressVIP\AiProviderForAskSage\Metadata;
 
+use Throwable;
 use WordPress\AiClient\Messages\Enums\ModalityEnum;
 use WordPress\AiClient\Providers\ApiBasedImplementation\AbstractApiBasedModelMetadataDirectory;
 use WordPress\AiClient\Providers\Http\DTO\Request;
@@ -97,17 +98,61 @@ class AskSageModelMetadataDirectory extends AbstractApiBasedModelMetadataDirecto
 				}
 			}
 
-			$models = array_values( array_filter( array_map( 'strval', $models ) ) );
+			$models = $this->normalize_model_ids( $models );
 
 			if ( ! empty( $models ) ) {
 				return $models;
 			}
-		} catch ( \Throwable $e ) {
-			// Fall through to the default below.
-			unset( $e );
+		} catch ( Throwable $e ) {
+			if ( function_exists( 'wp_trigger_error' ) && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				wp_trigger_error(
+					__METHOD__,
+					sprintf(
+						/* translators: %s: Error message from the Ask Sage API or HTTP layer. */
+						__( 'Ask Sage model discovery failed; using the fallback model. %s', 'ai-provider-for-ask-sage' ),
+						$e->getMessage()
+					)
+				);
+			}
 		}
 
 		return array( self::FALLBACK_MODEL );
+	}
+
+	/**
+	 * Extracts string model IDs from a get-models payload.
+	 *
+	 * @since 1.1.1
+	 *
+	 * @param array<mixed> $models Raw model list from the API.
+	 * @return string[] The model IDs.
+	 */
+	private function normalize_model_ids( array $models ): array {
+		$ids = array();
+
+		foreach ( $models as $model ) {
+			$model_id = '';
+
+			if ( is_string( $model ) ) {
+				$model_id = $model;
+			} elseif ( is_array( $model ) ) {
+				foreach ( array( 'id', 'model', 'name' ) as $key ) {
+					if ( isset( $model[ $key ] ) && is_string( $model[ $key ] ) ) {
+						$model_id = $model[ $key ];
+						break;
+					}
+				}
+			}
+
+			$model_id = trim( $model_id );
+			if ( '' === $model_id ) {
+				continue;
+			}
+
+			$ids[] = $model_id;
+		}
+
+		return array_values( array_unique( $ids ) );
 	}
 
 	/**

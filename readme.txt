@@ -4,7 +4,7 @@ Tags: ai, ask-sage, llm, fedramp, govtech
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,8 +38,10 @@ Provide the Ask Sage API key by any of the following, checked in order:
 2. PHP constant `ASK_SAGE_API_KEY`
 3. Settings > Connectors > Ask Sage
 
-Government tenants set their instance endpoint with the `ASK_SAGE_BASE_URL` constant. It defaults
-to `https://api.asksage.ai`.
+Government tenants set their instance endpoint with the `ASK_SAGE_BASE_URL` constant
+or environment variable. It must be HTTPS. Invalid values fail closed rather than
+falling back to `https://api.asksage.ai`. On WordPress VIP, prefer environment
+variables over the Connectors UI so the API key is not stored in the database.
 
 == Frequently Asked Questions ==
 
@@ -63,6 +65,9 @@ raised and grounding takes precedence.
 Yes. Use the `ai_provider_for_ask_sage_query_params` filter.
 
 == Changelog ==
+
+= 1.1.1 =
+* Align with WordPress VIP PHPCS (WordPress-VIP-Go, Extra, Docs) and harden request handling.
 
 = 1.1.0 =
 * Added OpenAI-compatible endpoint support with automatic per-request routing.

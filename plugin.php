@@ -5,7 +5,7 @@
  * Description:       Ask Sage provider for the WordPress AI Client. FedRAMP High / IL-authorized GenAI with dataset grounding and personas.
  * Requires at least: 7.0
  * Requires PHP:      7.4
- * Version:           1.1.0
+ * Version:           1.1.1
  * Author:            WordPress VIP
  * Author URI:        https://wpvip.com
  * License:           GPL-2.0-or-later
@@ -41,7 +41,7 @@ function requirement_notice( string $message ): void {
 	}
 	?>
 	<div class="notice notice-error">
-		<p><?php echo wp_kses_post( $message ); ?></p>
+		<p><?php echo esc_html( $message ); ?></p>
 	</div>
 	<?php
 }
@@ -54,7 +54,7 @@ function requirement_notice( string $message ): void {
  * @return bool True if PHP version is sufficient.
  */
 function check_php_version(): bool {
-	if ( version_compare( phpversion(), AI_PROVIDER_FOR_ASK_SAGE_MIN_PHP_VERSION, '<' ) ) {
+	if ( version_compare( PHP_VERSION, AI_PROVIDER_FOR_ASK_SAGE_MIN_PHP_VERSION, '<' ) ) {
 		add_action(
 			'admin_notices',
 			static function () {

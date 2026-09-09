@@ -26,12 +26,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * specification, which means the SDK's OpenAI-compatible base class handles multi-turn
  * conversations, sampling parameters, tool calling and token usage without further work.
  *
- * Two differences from the native surface matter:
- *
- * - It authenticates with `Authorization: Bearer`, not `x-access-tokens`, so the header is added
- *   here rather than relying on the provider's registered authentication instance.
- * - It does not carry Ask Sage's grounding parameters. Requests that need dataset grounding,
- *   personas or live retrieval are routed to the native endpoint instead.
+ * Authentication is applied after this method returns, by AccessTokenAuthentication, which
+ * sends `Authorization: Bearer` for this surface. Grounding parameters are not available
+ * here; those requests are routed to the native endpoint instead.
  *
  * @since 1.1.0
  */
@@ -49,11 +46,19 @@ class AskSageOpenAiCompatibleTextGenerationModel extends AbstractOpenAiCompatibl
 	 * {@inheritDoc}
 	 *
 	 * @since 1.1.0
+	 *
+	 * @param HttpMethodEnum                     $method  The HTTP method.
+	 * @param string                             $path    The API endpoint path, relative to the base URI.
+	 * @param array<string, string|list<string>> $headers The request headers.
+	 * @param string|array<string, mixed>|null   $data    The request data.
+	 * @return Request The request object.
 	 */
-	protected function createRequest( HttpMethodEnum $method, string $path, array $headers = array(), $data = null ): Request {
-		// This surface expects a bearer token rather than the x-access-tokens header used natively.
-		$headers['Authorization'] = 'Bearer ' . Credentials::api_key();
-
+	protected function createRequest(
+		HttpMethodEnum $method,
+		string $path,
+		array $headers = array(),
+		$data = null
+	): Request {
 		return new Request(
 			$method,
 			Credentials::base_url() . self::API_PATH . ltrim( $path, '/' ),

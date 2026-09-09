@@ -9,13 +9,37 @@
 	<arg name="extensions" value="php"/>
 	<arg name="basepath" value="."/>
 	<arg name="colors"/>
+	<arg name="parallel" value="8"/>
 	<arg value="sp"/>
 
+	<!--
+		WordPress-VIP-Go is required for VIP. Extra and Docs are recommended:
+		https://docs.wpvip.com/php_codesniffer/phpcs-xml-dist/
+	-->
 	<rule ref="WordPress-VIP-Go"/>
+	<rule ref="WordPress-Extra">
+		<!-- PSR-4 class names are required by the PHP AI Client SDK. -->
+		<exclude name="WordPress.Files.FileName"/>
+		<exclude name="Generic.Files.OneObjectStructurePerFile"/>
+		<exclude name="Universal.Files.SeparateFunctionsFromOO"/>
+	</rule>
 	<rule ref="WordPress-Docs"/>
+
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" type="array" value="ai-provider-for-ask-sage"/>
+			<property name="text_domain" type="array">
+				<element value="ai-provider-for-ask-sage"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="ai_provider_for_ask_sage"/>
+				<element value="AI_PROVIDER_FOR_ASK_SAGE"/>
+				<element value="WordPressVIP"/>
+			</property>
 		</properties>
 	</rule>
 

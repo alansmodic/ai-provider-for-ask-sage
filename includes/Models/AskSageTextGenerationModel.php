@@ -63,10 +63,10 @@ class AskSageTextGenerationModel extends AbstractApiBasedModel implements TextGe
 	 * @var array<string, string>
 	 */
 	private const OPENAI_ONLY_CONFIG = array(
-		'getMaxTokens'         => 'maxTokens',
-		'getTopP'              => 'topP',
-		'getFrequencyPenalty'  => 'frequencyPenalty',
-		'getPresencePenalty'   => 'presencePenalty',
+		'getMaxTokens'            => 'maxTokens',
+		'getTopP'                 => 'topP',
+		'getFrequencyPenalty'     => 'frequencyPenalty',
+		'getPresencePenalty'      => 'presencePenalty',
 		'getFunctionDeclarations' => 'functionDeclarations',
 	);
 
@@ -75,7 +75,8 @@ class AskSageTextGenerationModel extends AbstractApiBasedModel implements TextGe
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param list<\WordPress\AiClient\Messages\DTO\Message> $prompt The conversation turns.
+	 * @param \WordPress\AiClient\Messages\DTO\Message[] $prompt The conversation turns.
+	 * @return GenerativeAiResult The generation result.
 	 */
 	public function generateTextResult( array $prompt ): GenerativeAiResult {
 		$delegate = $this->resolve_delegate();
@@ -166,8 +167,8 @@ class AskSageTextGenerationModel extends AbstractApiBasedModel implements TextGe
 			__METHOD__,
 			sprintf(
 				/* translators: %s: Comma-separated list of configuration option names. */
-				esc_html__( 'Ask Sage grounding options were requested, so the native endpoint was used and these options were not applied: %s.', 'ai-provider-for-ask-sage' ),
-				esc_html( implode( ', ', $dropped ) )
+				__( 'Ask Sage grounding options were requested, so the native endpoint was used and these options were not applied: %s.', 'ai-provider-for-ask-sage' ),
+				implode( ', ', $dropped )
 			)
 		);
 	}

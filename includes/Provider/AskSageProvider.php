@@ -67,9 +67,12 @@ class AskSageProvider extends AbstractApiProvider {
 
 		// Provider logo path support was added in AI Client 1.3.0.
 		if ( version_compare( AiClient::VERSION, '1.3.0', '>=' ) ) {
-			$provider_meta[] = defined( 'AI_PROVIDER_FOR_ASK_SAGE_PLUGIN_DIR' )
+			$logo_path = defined( 'AI_PROVIDER_FOR_ASK_SAGE_PLUGIN_DIR' )
 				? AI_PROVIDER_FOR_ASK_SAGE_PLUGIN_DIR . 'includes/Provider/logo.png'
 				: dirname( __DIR__, 2 ) . '/includes/Provider/logo.png';
+			if ( is_readable( $logo_path ) ) {
+				$provider_meta[] = $logo_path;
+			}
 		}
 
 		return new ProviderMetadata( ...$provider_meta );
@@ -97,6 +100,12 @@ class AskSageProvider extends AbstractApiProvider {
 	 * {@inheritDoc}
 	 *
 	 * @since 1.0.0
+	 *
+	 * @param ModelMetadata    $model_metadata    The selected model metadata.
+	 * @param ProviderMetadata $provider_metadata The provider metadata.
+	 * @return ModelInterface The model instance.
+	 *
+	 * @throws RuntimeException If the model does not support text generation.
 	 */
 	protected static function createModel(
 		ModelMetadata $model_metadata,
@@ -108,9 +117,19 @@ class AskSageProvider extends AbstractApiProvider {
 			}
 		}
 
-		throw new RuntimeException(
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not output.
-			'Unsupported Ask Sage model capabilities for model: ' . $model_metadata->getId()
+		$message = sprintf(
+			'Unsupported Ask Sage model capabilities for model: %s',
+			$model_metadata->getId()
 		);
+
+		if ( function_exists( '__' ) ) {
+			$message = sprintf(
+				/* translators: %s: Model identifier. */
+				__( 'Unsupported Ask Sage model capabilities for model: %s', 'ai-provider-for-ask-sage' ),
+				$model_metadata->getId()
+			);
+		}
+
+		throw new RuntimeException( $message );
 	}
 }

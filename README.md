@@ -21,8 +21,8 @@ composer require wpvip/ai-provider-for-ask-sage
 Or drop the directory into `wp-content/plugins/` and activate — a fallback PSR-4 autoloader is included, so `composer install` is optional.
 
 ```php
-// wp-config.php
-define( 'ASK_SAGE_BASE_URL', 'https://api.<your-tenant>.ai' ); // GovCloud / IL endpoint
+// wp-config.php — prefer env vars on WordPress VIP so the key is not stored in the database.
+define( 'ASK_SAGE_BASE_URL', 'https://api.<your-tenant>.ai' ); // GovCloud / IL endpoint; HTTPS only
 define( 'ASK_SAGE_API_KEY', getenv( 'ASK_SAGE_API_KEY' ) );    // or use Settings > Connectors
 ```
 
@@ -101,15 +101,20 @@ SDK's HTTP transporter.
 
 ## Option support
 
-Advertised (honored by `/server/query`): `inputModalities`, `outputModalities`, `systemInstruction`,
-`temperature`, `customOptions`.
+Advertised (honored by at least one surface): `inputModalities`, `outputModalities`,
+`systemInstruction`, `temperature`, `customOptions`, `maxTokens`, `topP`,
+`frequencyPenalty`, `presencePenalty`, `functionDeclarations`.
 
-Deliberately not advertised: `maxTokens`, `topP`, `topK`, `stopSequences`, `presencePenalty`,
-`frequencyPenalty`, `logprobs`, `functionDeclarations`, `webSearch`, and output file/schema options.
-Callers that set these correctly fall through to another provider.
+Grounding options travel through `customOptions` (`dataset`, `persona`, `live`,
+`limit_references`). Callers that set OpenAI-only sampling options together with
+grounding are routed to `/server/query`; a debug notice is raised under `WP_DEBUG`.
 
-Not implemented on the native endpoint: streaming, and function calling (`/server/query` accepts a
-`tools` array but its format varies by model).
+Deliberately not advertised: `topK`, `stopSequences`, `logprobs`, `webSearch`, and
+output file/schema options. Callers that set these correctly fall through to another
+provider.
+
+Not implemented on the native endpoint: streaming, and function calling (`/server/query`
+accepts a `tools` array but its format varies by model).
 
 
 ## License

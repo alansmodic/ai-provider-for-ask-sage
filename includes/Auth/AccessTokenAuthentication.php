@@ -29,16 +29,40 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Ask Sage accepts its static API key directly as an access token, so no exchange against
  * /user/get-token-with-api-key is required.
  *
+ * The OpenAI-compatible surface is the exception: it expects `Authorization: Bearer`. The SDK
+ * always calls authenticateRequest() after createRequest(), so header selection happens here
+ * based on the request URI. That avoids sending both headers on the same request.
+ *
  * @since 1.0.0
  */
 class AccessTokenAuthentication extends ApiKeyRequestAuthentication {
 
 	/**
+	 * Path fragment that identifies Ask Sage's OpenAI-compatible surface.
+	 *
+	 * @since 1.1.1
+	 * @var string
+	 */
+	private const OPENAI_PATH_FRAGMENT = '/server/openai/';
+
+	/**
 	 * {@inheritDoc}
 	 *
 	 * @since 1.0.0
+	 *
+	 * @param Request $request The request to authenticate.
+	 * @return Request The authenticated request.
 	 */
 	public function authenticateRequest( Request $request ): Request {
-		return $request->withHeader( 'x-access-tokens', $this->getApiKey() );
+		$api_key = $this->getApiKey();
+		if ( '' === $api_key ) {
+			return $request;
+		}
+
+		if ( false !== strpos( $request->getUri(), self::OPENAI_PATH_FRAGMENT ) ) {
+			return $request->withHeader( 'Authorization', 'Bearer ' . $api_key );
+		}
+
+		return $request->withHeader( 'x-access-tokens', $api_key );
 	}
 }

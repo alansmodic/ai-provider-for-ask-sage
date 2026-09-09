@@ -3,8 +3,6 @@ parameters:
 	paths:
 		- includes
 		- plugin.php
-	scanDirectories:
-		- ../../../wp-includes/php-ai-client/src
 	bootstrapFiles:
 		- plugin.php
 	treatPhpDocTypesAsCertain: false

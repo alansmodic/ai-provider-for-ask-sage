@@ -103,9 +103,13 @@ class Plugin {
 	 * @return array<string> Modified action links.
 	 */
 	public function plugin_action_links( array $links ): array {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return $links;
+		}
+
 		$settings_link = sprintf(
 			'<a href="%1$s">%2$s</a>',
-			admin_url( 'options-general.php?page=connectors' ),
+			esc_url( admin_url( 'options-general.php?page=connectors' ) ),
 			esc_html__( 'Settings', 'ai-provider-for-ask-sage' )
 		);
 
