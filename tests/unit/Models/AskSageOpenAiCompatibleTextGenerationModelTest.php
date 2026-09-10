@@ -32,8 +32,14 @@ class AskSageOpenAiCompatibleTextGenerationModelTest extends TestCase {
 	 * outputSchema. The base OpenAI-compatible model translates that into response_format;
 	 * this confirms Ask Sage's surface actually receives it, now that the model metadata
 	 * advertises the option (see AskSageModelMetadataDirectoryTest).
+	 *
+	 * The SDK base class puts the raw schema directly under `json_schema` with no `name`
+	 * property. OpenAI's spec requires response_format.json_schema.name, so Ask Sage's strict
+	 * OpenAI-compatible surface rejects that shape with a 400 "Missing required parameter:
+	 * 'response_format.json_schema.name'". This asserts the corrected, spec-compliant shape our
+	 * prepareResponseFormatParam() override produces instead.
 	 */
-	public function test_output_schema_is_forwarded_as_response_format(): void {
+	public function test_output_schema_is_forwarded_as_a_spec_compliant_response_format(): void {
 		list( $model, $transporter ) = ProviderFixtures::openai_model();
 		$schema                      = array(
 			'type'       => 'object',
@@ -46,7 +52,8 @@ class AskSageOpenAiCompatibleTextGenerationModelTest extends TestCase {
 		$body = $transporter->last_request->getData();
 		$this->assertIsArray( $body );
 		$this->assertSame( 'json_schema', $body['response_format']['type'] );
-		$this->assertSame( $schema, $body['response_format']['json_schema'] );
+		$this->assertSame( 'structured_response', $body['response_format']['json_schema']['name'] );
+		$this->assertSame( $schema, $body['response_format']['json_schema']['schema'] );
 	}
 
 	/**

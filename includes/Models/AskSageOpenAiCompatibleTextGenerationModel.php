@@ -86,4 +86,31 @@ class AskSageOpenAiCompatibleTextGenerationModel extends AbstractOpenAiCompatibl
 
 		AskSageResponseValidator::throwIfErrorStatus( $response );
 	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * The SDK base class puts the raw output schema directly under `json_schema` without the
+	 * `name` property OpenAI's response_format.json_schema requires, so Ask Sage (and any other
+	 * strict OpenAI-compatible surface) rejects it with "Missing required parameter:
+	 * 'response_format.json_schema.name'". Wrapping it here restores a spec-compliant payload.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param array<string, mixed>|null $output_schema The output schema.
+	 * @return array<string, mixed> The prepared response format parameter.
+	 */
+	protected function prepareResponseFormatParam( ?array $output_schema ): array {
+		if ( ! is_array( $output_schema ) ) {
+			return parent::prepareResponseFormatParam( $output_schema );
+		}
+
+		return array(
+			'type'        => 'json_schema',
+			'json_schema' => array(
+				'name'   => 'structured_response',
+				'schema' => $output_schema,
+			),
+		);
+	}
 }
