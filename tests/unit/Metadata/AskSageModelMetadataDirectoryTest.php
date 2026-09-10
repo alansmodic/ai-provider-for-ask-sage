@@ -10,6 +10,9 @@ declare( strict_types=1 );
 namespace WordPressVIP\AiProviderForAskSage\Tests\Unit\Metadata;
 
 use RuntimeException;
+use WordPress\AiClient\Providers\Models\DTO\ModelRequirements;
+use WordPress\AiClient\Providers\Models\DTO\RequiredOption;
+use WordPress\AiClient\Providers\Models\Enums\CapabilityEnum;
 use WordPress\AiClient\Providers\Models\Enums\OptionEnum;
 use WordPressVIP\AiProviderForAskSage\Auth\AccessTokenAuthentication;
 use WordPressVIP\AiProviderForAskSage\Metadata\AskSageModelMetadataDirectory;
@@ -76,6 +79,29 @@ class AskSageModelMetadataDirectoryTest extends TestCase {
 		);
 
 		$this->assertContains( OptionEnum::outputSchema()->value, $names );
+	}
+
+	/**
+	 * as_json_response() sets BOTH outputSchema and outputMimeType ('application/json') on
+	 * ModelConfig; the SDK only forwards outputSchema as response_format when outputMimeType is
+	 * exactly 'application/json'. Advertising outputSchema alone still left
+	 * ModelRequirements::areMetBy() failing on the unmet outputMimeType requirement, so this
+	 * checks the combined requirement the same way as_json_response() actually assembles it,
+	 * not just each option in isolation.
+	 */
+	public function test_meets_combined_structured_output_requirements_from_as_json_response(): void {
+		$directory = $this->wired_directory( new RecordingHttpTransporter() );
+		$metadata  = $directory->getModelMetadata( 'gpt-4.1-mini' );
+
+		$requirements = new ModelRequirements(
+			array( CapabilityEnum::textGeneration() ),
+			array(
+				new RequiredOption( OptionEnum::outputSchema(), array( 'type' => 'object' ) ),
+				new RequiredOption( OptionEnum::outputMimeType(), 'application/json' ),
+			)
+		);
+
+		$this->assertTrue( $requirements->areMetBy( $metadata ) );
 	}
 
 	/**

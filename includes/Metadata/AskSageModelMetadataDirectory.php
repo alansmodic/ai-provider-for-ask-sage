@@ -195,6 +195,9 @@ class AskSageModelMetadataDirectory extends AbstractApiBasedModelMetadataDirecto
 				new SupportedOption( OptionEnum::presencePenalty() ),
 				new SupportedOption( OptionEnum::functionDeclarations() ),
 				new SupportedOption( OptionEnum::outputSchema() ),
+				// as_json_response() requires outputMimeType alongside outputSchema; the SDK only
+				// builds response_format when outputMimeType is exactly 'application/json'.
+				new SupportedOption( OptionEnum::outputMimeType(), array( 'application/json' ) ),
 			)
 		);
 	}
