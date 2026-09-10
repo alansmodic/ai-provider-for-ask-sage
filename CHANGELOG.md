@@ -8,6 +8,16 @@ All notable changes to this project are documented in this file.
 - PHPUnit 9 suite with mocked HTTP coverage for credentials, authentication,
   surface routing, native query payloads, and model discovery.
 
+### Fixed
+- Ask Sage reports request failures (invalid token, unknown model, etc.) with
+  an HTTP 200 status and the real outcome embedded in the response body as
+  `status`/`response`, on both the native and OpenAI-compatible surfaces.
+  This went unnoticed by the status-code-based checks in both this provider
+  and the underlying SDK, so a real Ask Sage-side error surfaced as a
+  confusing "missing choices/message key" exception instead of the actual
+  error. Both surfaces now check for Ask Sage's embedded status and raise a
+  clear `ResponseException` with Ask Sage's own message when it reports one.
+
 ## [1.1.1]
 
 ### Changed

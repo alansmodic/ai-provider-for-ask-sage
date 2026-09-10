@@ -22,6 +22,7 @@ use WordPress\AiClient\Providers\Models\Enums\CapabilityEnum;
 use WordPress\AiClient\Providers\Models\Enums\OptionEnum;
 use WordPressVIP\AiProviderForAskSage\Auth\AccessTokenAuthentication;
 use WordPressVIP\AiProviderForAskSage\Models\AskSageNativeTextGenerationModel;
+use WordPressVIP\AiProviderForAskSage\Models\AskSageOpenAiCompatibleTextGenerationModel;
 use WordPressVIP\AiProviderForAskSage\Models\AskSageTextGenerationModel;
 use WordPressVIP\AiProviderForAskSage\Support\Credentials;
 
@@ -143,11 +144,27 @@ class ProviderFixtures {
 	}
 
 	/**
+	 * An OpenAI-compatible model wired to a recording transporter.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param RecordingHttpTransporter|null $transporter Optional transporter.
+	 * @return array{0: AskSageOpenAiCompatibleTextGenerationModel, 1: RecordingHttpTransporter}
+	 */
+	public static function openai_model( ?RecordingHttpTransporter $transporter = null ): array {
+		$transporter = $transporter ?? new RecordingHttpTransporter();
+		$model       = new AskSageOpenAiCompatibleTextGenerationModel( self::model_metadata(), self::provider_metadata() );
+		self::wire_model( $model, $transporter );
+
+		return array( $model, $transporter );
+	}
+
+	/**
 	 * Attaches HTTP and authentication dependencies.
 	 *
 	 * @since 1.1.1
 	 *
-	 * @param AskSageTextGenerationModel|AskSageNativeTextGenerationModel $model       The model.
+	 * @param AskSageTextGenerationModel|AskSageNativeTextGenerationModel|AskSageOpenAiCompatibleTextGenerationModel $model       The model.
 	 * @param RecordingHttpTransporter                                    $transporter The transporter.
 	 */
 	private static function wire_model( $model, RecordingHttpTransporter $transporter ): void {

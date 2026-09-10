@@ -105,4 +105,19 @@ class AskSageNativeTextGenerationModelTest extends TestCase {
 		$this->expectException( ResponseException::class );
 		$model->generateTextResult( array( ProviderFixtures::user_message( 'Q' ) ) );
 	}
+
+	public function test_error_status_in_200_response_throws_response_exception_with_ask_sage_message(): void {
+		$transporter           = new RecordingHttpTransporter();
+		$transporter->response = RecordingHttpTransporter::json_response(
+			array(
+				'response' => 'Token is invalid [2]',
+				'status'   => 400,
+			)
+		);
+		list( $model ) = ProviderFixtures::native_model( $transporter );
+
+		$this->expectException( ResponseException::class );
+		$this->expectExceptionMessage( 'Ask Sage API error (400): Token is invalid [2]' );
+		$model->generateTextResult( array( ProviderFixtures::user_message( 'Q' ) ) );
+	}
 }

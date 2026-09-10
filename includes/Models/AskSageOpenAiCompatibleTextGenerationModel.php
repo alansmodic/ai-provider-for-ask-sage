@@ -11,8 +11,10 @@ declare( strict_types=1 );
 namespace WordPressVIP\AiProviderForAskSage\Models;
 
 use WordPress\AiClient\Providers\Http\DTO\Request;
+use WordPress\AiClient\Providers\Http\DTO\Response;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCompatibleTextGenerationModel;
+use WordPressVIP\AiProviderForAskSage\Support\AskSageResponseValidator;
 use WordPressVIP\AiProviderForAskSage\Support\Credentials;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -66,5 +68,22 @@ class AskSageOpenAiCompatibleTextGenerationModel extends AbstractOpenAiCompatibl
 			$data,
 			$this->getRequestOptions()
 		);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * Ask Sage reports failures on this surface (invalid token, unknown model, etc.) with an
+	 * HTTP 200 status and the real outcome embedded in the response body, which the parent
+	 * class's status-code-based check does not catch.
+	 *
+	 * @since 1.1.2
+	 *
+	 * @param Response $response The HTTP response to check.
+	 */
+	protected function throwIfNotSuccessful( Response $response ): void {
+		parent::throwIfNotSuccessful( $response );
+
+		AskSageResponseValidator::throwIfErrorStatus( $response );
 	}
 }
