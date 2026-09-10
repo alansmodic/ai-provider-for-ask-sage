@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Added
+- PHPUnit 9 suite with mocked HTTP coverage for credentials, authentication,
+  surface routing, native query payloads, and model discovery.
+
 ## [1.1.1]
 
 ### Changed

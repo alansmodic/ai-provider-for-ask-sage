@@ -26,6 +26,15 @@ define( 'ASK_SAGE_BASE_URL', 'https://api.<your-tenant>.ai' ); // GovCloud / IL 
 define( 'ASK_SAGE_API_KEY', getenv( 'ASK_SAGE_API_KEY' ) );    // or use Settings > Connectors
 ```
 
+## Tests
+
+```bash
+composer install
+composer test
+```
+
+The suite is PHPUnit 9 with a recording HTTP transporter. It does not call a live Ask Sage tenant.
+
 ## Usage
 
 No Ask Sage-specific code is required:
