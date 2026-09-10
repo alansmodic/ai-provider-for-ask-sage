@@ -194,6 +194,7 @@ class AskSageModelMetadataDirectory extends AbstractApiBasedModelMetadataDirecto
 				new SupportedOption( OptionEnum::frequencyPenalty() ),
 				new SupportedOption( OptionEnum::presencePenalty() ),
 				new SupportedOption( OptionEnum::functionDeclarations() ),
+				new SupportedOption( OptionEnum::outputSchema() ),
 			)
 		);
 	}

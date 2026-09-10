@@ -28,6 +28,28 @@ class AskSageOpenAiCompatibleTextGenerationModelTest extends TestCase {
 	}
 
 	/**
+	 * Abilities like Editorial Notes call as_json_response(), which sets ModelConfig's
+	 * outputSchema. The base OpenAI-compatible model translates that into response_format;
+	 * this confirms Ask Sage's surface actually receives it, now that the model metadata
+	 * advertises the option (see AskSageModelMetadataDirectoryTest).
+	 */
+	public function test_output_schema_is_forwarded_as_response_format(): void {
+		list( $model, $transporter ) = ProviderFixtures::openai_model();
+		$schema                      = array(
+			'type'       => 'object',
+			'properties' => array( 'suggestions' => array( 'type' => 'array' ) ),
+		);
+		$model->getConfig()->setOutputSchema( $schema );
+
+		$model->generateTextResult( array( ProviderFixtures::user_message( 'Q' ) ) );
+
+		$body = $transporter->last_request->getData();
+		$this->assertIsArray( $body );
+		$this->assertSame( 'json_schema', $body['response_format']['type'] );
+		$this->assertSame( $schema, $body['response_format']['json_schema'] );
+	}
+
+	/**
 	 * Ask Sage reports failures on this surface (invalid token, unknown model, etc.) with an
 	 * HTTP 200 status and the real outcome embedded in the response body, rather than a 4xx/5xx
 	 * status. Left unchecked, this surfaces as a confusing "missing choices key" exception
