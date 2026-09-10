@@ -26,7 +26,8 @@ class AskSageModelMetadataDirectoryTest extends TestCase {
 
 		$this->assertTrue( $directory->hasModelMetadata( 'gpt-4.1-mini' ) );
 		$this->assertTrue( $directory->hasModelMetadata( 'claude-sonnet' ) );
-		$this->assertSame( 'claude-sonnet (Ask Sage)', $directory->getModelMetadata( 'claude-sonnet' )->getName() );
+		$this->assertSame( 'claude-sonnet', $directory->getModelMetadata( 'claude-sonnet' )->getId() );
+		$this->assertStringContainsString( 'Ask Sage', $directory->getModelMetadata( 'claude-sonnet' )->getName() );
 	}
 
 	public function test_falls_back_when_the_request_fails(): void {
