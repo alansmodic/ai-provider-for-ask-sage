@@ -73,6 +73,34 @@ class AskSageTextGenerationModelTest extends TestCase {
 		$this->assertStringContainsString( '/server/openai/v1/', $transporter->last_request->getUri() );
 	}
 
+	public function test_grounded_structured_output_raises_debug_notice_and_stays_on_native(): void {
+		list( $model, $transporter ) = ProviderFixtures::routing_model();
+		$model->getConfig()->setCustomOptions( array( 'dataset' => array( 'agency_policy_docs' ) ) );
+		$model->getConfig()->setOutputSchema( array( 'type' => 'object' ) );
+		$model->getConfig()->setOutputMimeType( 'application/json' );
+
+		$model->generateTextResult( array( ProviderFixtures::user_message( 'Q' ) ) );
+
+		$this->assertStringContainsString( '/server/query', $transporter->last_request->getUri() );
+		$this->assertArrayNotHasKey( 'response_format', $transporter->last_request->getData() );
+
+		$messages = implode(
+			' ',
+			array_column( $GLOBALS['ai_provider_for_ask_sage_test_errors'], 'message' )
+		);
+		$this->assertStringContainsString( 'outputSchema', $messages );
+		$this->assertStringContainsString( 'outputMimeType', $messages );
+	}
+
+	public function test_grounded_request_without_openai_options_does_not_warn(): void {
+		list( $model ) = ProviderFixtures::routing_model();
+		$model->getConfig()->setCustomOptions( array( 'dataset' => array( 'agency_policy_docs' ) ) );
+
+		$model->generateTextResult( array( ProviderFixtures::user_message( 'Q' ) ) );
+
+		$this->assertSame( array(), $GLOBALS['ai_provider_for_ask_sage_test_errors'] );
+	}
+
 	public function test_endpoint_option_forces_native_without_grounding(): void {
 		list( $model, $transporter ) = ProviderFixtures::routing_model();
 		$model->getConfig()->setCustomOptions(

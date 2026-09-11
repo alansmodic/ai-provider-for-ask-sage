@@ -57,7 +57,11 @@ class AskSageTextGenerationModel extends AbstractApiBasedModel implements TextGe
 	public const ENDPOINT_OPTION = 'asksage.endpoint';
 
 	/**
-	 * Sampling options that only the OpenAI-compatible surface honors.
+	 * Options that only the OpenAI-compatible surface honors.
+	 *
+	 * Includes sampling, tool calling, and structured JSON output. Grounded requests
+	 * still use `/server/query`, so these are dropped with a WP_DEBUG notice rather
+	 * than silently ignored.
 	 *
 	 * @since 1.1.0
 	 * @var array<string, string>
@@ -68,6 +72,8 @@ class AskSageTextGenerationModel extends AbstractApiBasedModel implements TextGe
 		'getFrequencyPenalty'     => 'frequencyPenalty',
 		'getPresencePenalty'      => 'presencePenalty',
 		'getFunctionDeclarations' => 'functionDeclarations',
+		'getOutputSchema'         => 'outputSchema',
+		'getOutputMimeType'       => 'outputMimeType',
 	);
 
 	/**

@@ -41,5 +41,6 @@ abstract class TestCase extends PHPUnit_TestCase {
 		putenv( 'ASK_SAGE_API_KEY' );
 		putenv( 'ASK_SAGE_BASE_URL' );
 		$GLOBALS['ai_provider_for_ask_sage_test_filters'] = array();
+		$GLOBALS['ai_provider_for_ask_sage_test_errors']  = array();
 	}
 }

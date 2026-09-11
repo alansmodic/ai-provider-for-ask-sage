@@ -11,6 +11,7 @@
 declare( strict_types=1 );
 
 $GLOBALS['ai_provider_for_ask_sage_test_filters'] = array();
+$GLOBALS['ai_provider_for_ask_sage_test_errors']  = array();
 
 if ( ! function_exists( 'add_filter' ) ) {
 	/**
@@ -51,6 +52,37 @@ if ( ! function_exists( 'apply_filters' ) ) {
 		}
 
 		return $value;
+	}
+}
+
+if ( ! function_exists( '__' ) ) {
+	/**
+	 * Identity gettext stub.
+	 *
+	 * @param string $text   Text to translate.
+	 * @param string $domain Text domain.
+	 * @return string The original text.
+	 */
+	function __( $text, $domain = 'default' ) {
+		unset( $domain );
+		return $text;
+	}
+}
+
+if ( ! function_exists( 'wp_trigger_error' ) ) {
+	/**
+	 * Records a triggered error for assertions instead of emitting a PHP notice.
+	 *
+	 * @param string $function_name Function that triggered the error.
+	 * @param string $message       Error message.
+	 * @param int    $error_level   Error level.
+	 */
+	function wp_trigger_error( $function_name, $message, $error_level = E_USER_NOTICE ) {
+		$GLOBALS['ai_provider_for_ask_sage_test_errors'][] = array(
+			'function_name' => $function_name,
+			'message'       => $message,
+			'error_level'   => $error_level,
+		);
 	}
 }
 

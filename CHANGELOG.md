@@ -8,6 +8,15 @@ All notable changes to this project are documented in this file.
 - PHPUnit 9 suite with mocked HTTP coverage for credentials, authentication,
   surface routing, native query payloads, and model discovery.
 
+### Changed
+- Model metadata advertises `outputSchema` and `outputMimeType` (`application/json`)
+  so abilities that call `as_json_response()` (Editorial Notes and others) can
+  select Ask Sage instead of failing with "no connected provider supports text
+  generation".
+- Grounded requests that also set `outputSchema` or `outputMimeType` now raise the
+  same `WP_DEBUG` notice as other OpenAI-only options, instead of silently dropping
+  structured output. Grounding still wins and those requests stay on `/server/query`.
+
 ### Fixed
 - Ask Sage reports request failures (invalid token, unknown model, etc.) with
   an HTTP 200 status and the real outcome embedded in the response body as
@@ -17,6 +26,10 @@ All notable changes to this project are documented in this file.
   confusing "missing choices/message key" exception instead of the actual
   error. Both surfaces now check for Ask Sage's embedded status and raise a
   clear `ResponseException` with Ask Sage's own message when it reports one.
+- The OpenAI-compatible surface now sends `response_format.json_schema` as
+  `{ name, schema }`. The SDK base class put the raw schema under `json_schema`
+  with no `name`, which Ask Sage's strict surface rejected with
+  `Missing required parameter: 'response_format.json_schema.name'`.
 
 ## [1.1.1]
 
