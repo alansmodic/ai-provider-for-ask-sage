@@ -56,9 +56,13 @@ Set the `asksage.endpoint` custom option to `native` or `openai` to force one.
 
 = Are any options still unsupported? =
 
-`topK`, `stopSequences`, `logprobs` and the output file/schema options are not advertised. Grounded
-requests also cannot use the OpenAI-only sampling options; when both are set, a debug notice is
-raised and grounding takes precedence.
+`topK`, `stopSequences`, `logprobs` and output file options are not advertised.
+`outputSchema` and `outputMimeType` (`application/json`) are advertised so abilities
+that request structured JSON (Editorial Notes, `as_json_response()`) can select Ask Sage.
+
+Grounded requests use `/server/query` and cannot use OpenAI-only options (`maxTokens`,
+`topP`, penalties, function calling, structured JSON). When both are set, a debug notice
+is raised and grounding takes precedence.
 
 = Can I force all requests to use a specific grounding dataset? =
 

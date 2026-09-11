@@ -112,18 +112,23 @@ SDK's HTTP transporter.
 
 Advertised (honored by at least one surface): `inputModalities`, `outputModalities`,
 `systemInstruction`, `temperature`, `customOptions`, `maxTokens`, `topP`,
-`frequencyPenalty`, `presencePenalty`, `functionDeclarations`.
+`frequencyPenalty`, `presencePenalty`, `functionDeclarations`, `outputSchema`,
+`outputMimeType` (`application/json`).
 
 Grounding options travel through `customOptions` (`dataset`, `persona`, `live`,
-`limit_references`). Callers that set OpenAI-only sampling options together with
-grounding are routed to `/server/query`; a debug notice is raised under `WP_DEBUG`.
+`limit_references`). Callers that set OpenAI-only options (`maxTokens`, `topP`,
+penalties, `functionDeclarations`, `outputSchema`, `outputMimeType`) together with
+grounding are routed to `/server/query`; those OpenAI-only options are not applied
+and a debug notice is raised under `WP_DEBUG`. Structured JSON therefore works for
+ungrounded abilities such as Editorial Notes (`as_json_response()`), but not when
+a dataset or persona is also set.
 
 Deliberately not advertised: `topK`, `stopSequences`, `logprobs`, `webSearch`, and
-output file/schema options. Callers that set these correctly fall through to another
+output file options. Callers that set these correctly fall through to another
 provider.
 
-Not implemented on the native endpoint: streaming, and function calling (`/server/query`
-accepts a `tools` array but its format varies by model).
+Not implemented on the native endpoint: streaming, function calling (`/server/query`
+accepts a `tools` array but its format varies by model), and structured JSON output.
 
 
 ## License
