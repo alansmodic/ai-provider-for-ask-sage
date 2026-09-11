@@ -24,6 +24,7 @@ use WordPress\AiClient\Results\DTO\GenerativeAiResult;
 use WordPress\AiClient\Results\DTO\TokenUsage;
 use WordPress\AiClient\Results\Enums\FinishReasonEnum;
 use WordPressVIP\AiProviderForAskSage\Provider\AskSageProvider;
+use WordPressVIP\AiProviderForAskSage\Support\AskSageResponseValidator;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -68,6 +69,7 @@ class AskSageNativeTextGenerationModel extends AbstractApiBasedModel implements 
 		$response = $this->getHttpTransporter()->send( $request );
 
 		ResponseUtil::throwIfNotSuccessful( $response );
+		AskSageResponseValidator::throwIfErrorStatus( $response );
 
 		$data = $response->getData();
 		if ( ! is_array( $data ) || ! isset( $data['message'] ) ) {
